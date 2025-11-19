@@ -1,0 +1,36 @@
+@font-face {
+	font-family: 'NotoSansJP';
+	src: url('fonts/NotoSansJP-VariableFont_wght.ttf');
+}
+
+* {
+	box-sizing: border-box;
+	border: none;
+	border-radius: 0;
+	background-color: transparent;
+	font: inherit;
+	padding: 0;
+	color: inherit;
+	margin: 0;
+}
+
+:root {
+	--color-bg: #eeeeee;
+	--color-bg-alt: #d7d7d7;
+	--color-text: #262626;
+	--color-text-dimmed: #636363;
+	--color-highlight: #e5ff6f;
+	--color-border: #aaaaaa;
+	--color-border-highlight: #b7c767;
+}
+
+body {
+	margin: 0;
+	font-family: 'NotoSansJP', sans-serif;
+	font-size: 12pt;
+	background-color: var(--color-bg);
+	color: var(--color-text);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
