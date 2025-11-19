@@ -1,15 +1,15 @@
 <script lang="ts">
-	import type { Gojuuon } from '$lib/types/gojuuon';
+	import type { Monograph } from '$lib/types/monograph';
 
 	type Props = {
-		selectedGojuuon?: Set<Gojuuon>;
+		selectedMonograph?: Set<Monograph>;
 		showKatakana?: boolean;
 	};
 
 	// vowels
-	type Boin = Extract<Gojuuon, 'a' | 'i' | 'u' | 'e' | 'o'>;
+	type Boin = Extract<Monograph, 'a' | 'i' | 'u' | 'e' | 'o'>;
 
-	const HIRAGANA_CHARACTERS: Record<Gojuuon, string> = {
+	const HIRAGANA_CHARACTERS: Record<Monograph, string> = {
 		a: 'あ',
 		i: 'い',
 		u: 'う',
@@ -58,7 +58,7 @@
 		n: 'ん'
 	};
 
-	const KATAKANA_CHARACTERS: Record<Gojuuon, string> = {
+	const KATAKANA_CHARACTERS: Record<Monograph, string> = {
 		a: 'ア',
 		i: 'イ',
 		u: 'ウ',
@@ -107,7 +107,7 @@
 		n: 'ン'
 	};
 
-	const ROMAJI_READINGS: Record<Gojuuon, string> = {
+	const ROMAJI_READINGS: Record<Monograph, string> = {
 		a: 'a',
 		i: 'i',
 		u: 'u',
@@ -168,17 +168,17 @@
 		['ra', 'ri', 'ru', 're', 'ro'],
 		['wa', '', '', '', 'wo'],
 		['n', '', '', '', '']
-	] as (Gojuuon | '')[][];
+	] as (Monograph | '')[][];
 
 	const COLUMNS = ['a', 'i', 'u', 'e', 'o'] as Boin[];
 
-	let { selectedGojuuon = $bindable(new Set()), showKatakana = false }: Props = $props();
+	let { selectedMonograph = $bindable(new Set()), showKatakana = false }: Props = $props();
 
-	function toggleSelected(kana: Set<Gojuuon>): void {
-		if (selectedGojuuon.isDisjointFrom(kana)) {
-			selectedGojuuon = selectedGojuuon.union(kana);
+	function toggleSelected(kana: Set<Monograph>): void {
+		if (selectedMonograph.isDisjointFrom(kana)) {
+			selectedMonograph = selectedMonograph.union(kana);
 		} else {
-			selectedGojuuon = selectedGojuuon.difference(kana);
+			selectedMonograph = selectedMonograph.difference(kana);
 		}
 	}
 
@@ -188,16 +188,16 @@
 
 	function toggleColumn(boin: Boin): void {
 		toggleSelected(
-			new Set(TABLE_LAYOUT.flat().filter((e): e is Gojuuon => e !== '' && e.includes(boin)))
+			new Set(TABLE_LAYOUT.flat().filter((e): e is Monograph => e !== '' && e.includes(boin)))
 		);
 	}
 
-	function toggleRow(row: Gojuuon[]): void {
+	function toggleRow(row: Monograph[]): void {
 		toggleSelected(new Set(row));
 	}
 </script>
 
-<div class="gojuuon-table">
+<div class="monograph-table">
 	<table>
 		<thead>
 			<tr>
@@ -228,18 +228,18 @@
 						</button>
 					</td>
 
-					{#each row as gojuuon}
+					{#each row as monograph}
 						<td>
-							{#if gojuuon !== ''}
+							{#if monograph !== ''}
 								<button
-									onclick={() => toggleSelected(new Set([gojuuon]))}
-									class="gojuuon"
-									class:selected={selectedGojuuon.has(gojuuon)}
+									onclick={() => toggleSelected(new Set([monograph]))}
+									class="monograph"
+									class:selected={selectedMonograph.has(monograph)}
 								>
 									<span class="character">
-										{(showKatakana ? KATAKANA_CHARACTERS : HIRAGANA_CHARACTERS)[gojuuon]}
+										{(showKatakana ? KATAKANA_CHARACTERS : HIRAGANA_CHARACTERS)[monograph]}
 									</span>
-									<span class="romaji-reading">{ROMAJI_READINGS[gojuuon]}</span>
+									<span class="romaji-reading">{ROMAJI_READINGS[monograph]}</span>
 								</button>
 							{/if}
 						</td>
@@ -251,21 +251,21 @@
 </div>
 
 <style>
-	.gojuuon-table table {
+	.monograph-table table {
 		border-collapse: collapse;
 	}
 
-	.gojuuon-table td {
+	.monograph-table td {
 		border: 1px solid var(--color-border);
 		overflow: hidden;
 	}
 
-	.gojuuon-table td:has(button.gojuuon.selected) {
+	.monograph-table td:has(button.monograph.selected) {
 		border-color: var(--color-border-highlight);
 		color: var(--color-text-highlight);
 	}
 
-	.gojuuon-table button {
+	.monograph-table button {
 		width: 3em;
 		height: 3em;
 		display: flex;
@@ -275,15 +275,15 @@
 		cursor: pointer;
 	}
 
-	.gojuuon-table button:not(.gojuuon) {
+	.monograph-table button:not(.monograph) {
 		background-color: var(--color-bg-alt);
 	}
 
-	.gojuuon-table button.gojuuon.selected {
+	.monograph-table button.monograph.selected {
 		background-color: var(--color-highlight);
 	}
 
-	.gojuuon-table button.gojuuon .romaji-reading {
+	.monograph-table button.monograph .romaji-reading {
 		color: var(--color-text-dimmed);
 		font-size: 0.8em;
 	}

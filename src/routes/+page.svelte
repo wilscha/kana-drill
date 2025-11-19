@@ -1,16 +1,16 @@
 <script lang="ts">
 	import CustomCheckbox from '$lib/components/CustomCheckbox.svelte';
 	import CustomSlider from '$lib/components/CustomSlider.svelte';
-	import GojuuonTable from '$lib/components/GojuuonTable.svelte';
+	import MonographTable from '$lib/components/MonographTable.svelte';
 	import { JLPT_N5_WORDS } from '$lib/data/jlpt-n5-words';
 	import { KANA } from '$lib/data/kana-characters';
-	import type { Gojuuon } from '$lib/types/gojuuon';
+	import type { Monograph } from '$lib/types/monograph';
 
 	type CharacterOptions = {
-		selectedGojuuon: Set<Gojuuon>;
+		selectedMonographs: Set<Monograph>;
 		katakana: boolean;
-		dakuten: boolean;
-		yoon: boolean;
+		diacritics: boolean;
+		diagraphs: boolean;
 	};
 
 	type DrillOptions = {
@@ -20,10 +20,10 @@
 	};
 
 	let characterOptions: CharacterOptions = $state({
-		selectedGojuuon: new Set(['a', 'i', 'u', 'e', 'o']),
+		selectedMonographs: new Set(['a', 'i', 'u', 'e', 'o']),
 		katakana: false,
-		dakuten: false,
-		yoon: false
+		diacritics: false,
+		diagraphs: false
 	});
 
 	let drillOptions: DrillOptions = $state({
@@ -38,18 +38,19 @@
 		alt: ''
 	});
 	let altRevealed = $state(false);
+	let wordCount = $state(0);
 
 	let selectedKana = $derived(
 		KANA.filter((e) => {
-			if (!characterOptions.selectedGojuuon.has(e.gojuuon)) return false;
+			if (!characterOptions.selectedMonographs.has(e.monograph)) return false;
 
 			if (e.kana !== (characterOptions.katakana ? 'katakana' : 'hiragana')) {
 				return false;
 			}
 
-			if (!characterOptions.dakuten && e.dakuten) return false;
+			if (!characterOptions.diacritics && e.diacritic) return false;
 
-			if (!characterOptions.yoon && e.yoon) return false;
+			if (!characterOptions.diagraphs && e.diagraph) return false;
 
 			return true;
 		}).map((e) => {
@@ -85,7 +86,8 @@
 	function startDrill(): void {
 		showDrillScreen = true;
 
-		nextWord();
+		showNextWord();
+		wordCount = 0;
 	}
 
 	function quitDrill(): void {
@@ -111,7 +113,7 @@
 			} else if (nextCharacter && nextCharacter === 'ー') {
 				romaji += reading;
 				romaji += reading?.charAt(reading?.length - 1);
-			} else if (nextCharacter && diagraphThings.includes(character)) {
+			} else if (nextCharacter && diagraphThings.includes(nextCharacter)) {
 				romaji += getReading(character + nextCharacter);
 			} else if (reading) {
 				romaji += reading;
@@ -121,7 +123,7 @@
 		return romaji;
 	}
 
-	function nextWord(): void {
+	function showNextWord(): void {
 		let kana = '',
 			romaji = '',
 			extra = '';
@@ -153,6 +155,15 @@
 		altRevealed = false;
 	}
 
+	function nextWord(): void {
+		showNextWord();
+		wordCount++;
+	}
+
+	function skipWord(): void {
+		showNextWord();
+	}
+
 	function revealAlt(): void {
 		altRevealed = true;
 	}
@@ -177,12 +188,20 @@
 		</div>
 
 		<div class="drill-buttons-container">
-			<button class="next" onclick={nextWord}>Next word</button>
+			<button class="next" onclick={altRevealed ? nextWord : revealAlt}>
+				{#if altRevealed}
+					Next
+				{:else}
+					Reveal
+				{/if}
+			</button>
 
-			<button class="reveal" class:revealed={altRevealed} onclick={revealAlt}>Reveal</button>
+			<button class="skip" disabled={altRevealed} onclick={skipWord}>Skip</button>
 
 			<button class="quit" onclick={quitDrill}>Quit</button>
 		</div>
+
+		<span class="drill-word-count">{wordCount} words</span>
 	</div>
 {:else}
 	<div class="main-container">
@@ -190,8 +209,8 @@
 
 		<div class="options-grid">
 			<div class="table-section">
-				<GojuuonTable
-					bind:selectedGojuuon={characterOptions.selectedGojuuon}
+				<MonographTable
+					bind:selectedMonograph={characterOptions.selectedMonographs}
 					showKatakana={characterOptions.katakana}
 				/>
 			</div>
@@ -205,15 +224,15 @@
 				<hr />
 
 				<label>
-					<CustomCheckbox bind:checked={characterOptions.dakuten} />
+					<CustomCheckbox bind:checked={characterOptions.diacritics} />
 					<span>
-						Dakuten/Handakuten<br />
+						Diacritics/Handiacritics<br />
 						<span class="description">Diacritics e. g. 「が」 or 「ぷ」</span>
 					</span>
 				</label>
 
 				<label>
-					<CustomCheckbox bind:checked={characterOptions.yoon} />
+					<CustomCheckbox bind:checked={characterOptions.diagraphs} />
 					<span>
 						Yōon<br />
 						<span class="description">Diagraphs e. g. 「きゃ」 or 「しょ」</span>
@@ -225,7 +244,10 @@
 				<label class="word-length" class:disabled={drillOptions.realWords}>
 					<span>
 						Word length: <b>{drillOptions.wordLength}</b><br />
-						<span class="description">Will be ignored if "Real words" selected.</span>
+						<span class="description"
+							>If "Real words" is not selected, randomly generated strings of said length will be
+							prompted.</span
+						>
 					</span>
 
 					<CustomSlider
@@ -243,8 +265,7 @@
 						<span class="description">
 							Words included in <a href="https://www.jlpt.jp/sp/e/about/levelsummary.html"
 								>JLPT N5</a
-							>
-							({possibleWords.length} words matched).
+							> will be prompted.
 						</span>
 					</span>
 				</label>
@@ -261,7 +282,8 @@
 			<div class="selected-characters-section">
 				<h2>Selected Characters</h2>
 				<span class="character-count">
-					<b>{selectedCharacters.length}</b> character(s) selected
+					<b>{selectedCharacters.length}</b> character(s) selected<br />
+					<b>{possibleWords.length}</b> real word(s) matched
 				</span>
 
 				<div class="selected-characters-container">
@@ -339,6 +361,10 @@
 		gap: 5px;
 	}
 
+	.options-section {
+		max-width: 400px;
+	}
+
 	h1 {
 		font-size: 2em;
 		font-weight: bold;
@@ -377,6 +403,7 @@
 		display: flex;
 		gap: 5px;
 		flex-wrap: wrap;
+		margin-top: 10px;
 	}
 
 	span.character-count {
@@ -421,6 +448,7 @@
 		gap: 50px;
 		padding: 30px;
 		height: 100vh;
+		width: 100%;
 	}
 
 	.word-container {
@@ -439,7 +467,7 @@
 		font-size: 1.75em;
 		background-color: var(--color-highlight);
 		border: 1px solid var(--color-border-highlight);
-		padding: 0 15px;
+		padding: 5px 15px;
 	}
 
 	span.extra {
@@ -452,14 +480,15 @@
 	}
 
 	.drill-buttons-container {
-		display: flex;
-		flex-wrap: wrap;
-		justify-content: center;
+		display: grid;
+		max-width: 300px;
+		width: 100%;
+		grid-template-columns: 1fr 1fr;
 		gap: 10px;
 	}
 
 	button.next,
-	button.reveal,
+	button.skip,
 	button.quit {
 		background-color: var(--color-bg-alt);
 		border: 1px solid var(--color-border);
@@ -467,10 +496,18 @@
 		cursor: pointer;
 	}
 
-	button.reveal.revealed {
+	button.next {
+		grid-column: 1 / 3;
+	}
+
+	button.skip:disabled {
 		border-style: dashed;
 		background-color: transparent;
 		color: var(--color-text-dimmed);
 		cursor: default;
+	}
+
+	span.drill-word-count {
+		color: var(--color-text-dimmed);
 	}
 </style>

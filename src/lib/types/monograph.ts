@@ -1,4 +1,4 @@
-export type Gojuuon =
+export type Monograph =
 	| 'a'
 	| 'i'
 	| 'u'

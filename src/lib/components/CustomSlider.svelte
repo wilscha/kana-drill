@@ -42,8 +42,8 @@
 	input[type='range'].custom-slider::-moz-range-thumb {
 		-webkit-appearance: none;
 		appearance: none;
-		width: 7px;
-		height: 20px;
+		width: 25px;
+		height: 12px;
 		border: none;
 		background-color: var(--color-text);
 	}
