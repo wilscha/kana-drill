@@ -2,7 +2,7 @@
 	import CustomCheckbox from '$lib/components/CustomCheckbox.svelte';
 	import CustomSlider from '$lib/components/CustomSlider.svelte';
 	import MonographTable from '$lib/components/MonographTable.svelte';
-	import { JLPT_N5_WORDS } from '$lib/data/jlpt-n5-words';
+	import JLPT_N5_WORDS from '$lib/data/jlpt-n5-words.json';
 	import { KANA } from '$lib/data/kana-characters';
 	import type { Monograph } from '$lib/types/monograph';
 
