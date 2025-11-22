@@ -226,7 +226,7 @@
 				<label>
 					<CustomCheckbox bind:checked={characterOptions.diacritics} />
 					<span>
-						Diacritics/Handiacritics<br />
+						Dakuten/Handakuten<br />
 						<span class="description">Diacritics e. g. 「が」 or 「ぷ」</span>
 					</span>
 				</label>
